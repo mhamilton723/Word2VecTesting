@@ -212,7 +212,7 @@ object AzureStorageUtils {
 
     val url = "https://rdscurrent.azureml-test.net/palettes/definitions"
     val host = "rdscurrent.azureml-test.net"
-    val jsonString = scala.io.Source.fromFile("Test_Palette_Request.txt").mkString
+    val jsonString = scala.io.Source.fromFile("tempPalette.json").mkString
     javaGet(jsonString,url,host)
     //postJSON(jsonString,url,host)
   }
