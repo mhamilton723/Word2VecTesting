@@ -84,16 +84,14 @@ object AzureStorageUtils {
     })
   }
 
-  def postJSON(jsonString:String,url:String, host:String,auth:String): Unit = {
+  def postJSON(jsonString:String,url:String, host:String): Unit = {
       val result = Http(url).postData(jsonString)
         .header("Content-Type", "application/json")
         .header("Charset", "UTF-8")
-        .header("Authorization", s"Basic $auth")
-        .header("Content-Type", "application/json; charset=utf-8")
         .header("Host", host)
-        //.header("Content-Length", "767")
         .header("Expect", "100-continue")
         .header("Connection", "Keep-Alive")
+          .
         .option(HttpOptions.readTimeout(10000)).asString
   }
 
@@ -158,6 +156,13 @@ object AzureStorageUtils {
       "dHFkMMb/y4iKj0p9QMeoUcFonE7ObA1fkWroADzlvqREk9XljmSM+LuKiz4nXMIUQykCn1NgWBjvYJSaw57IDA==",
       "moprescuspark"
     )
+
+    val url = "https://rdscurrent.azureml-test.net/palettes/definitions"
+    val host = "rdscurrent.azureml-test.net"
+    val jsonString = scala.io.Source.fromFile("tempPalette.json").mkString
+
+    postJSON(jsonString,url,host)
+
   }
 
 }
