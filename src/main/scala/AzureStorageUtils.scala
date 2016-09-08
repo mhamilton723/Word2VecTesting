@@ -1,7 +1,10 @@
 import java.io.{File, FileInputStream, FileNotFoundException}
+import javax.net.ssl.SSLSocketFactory
 
 import com.microsoft.azure.storage.{CloudStorageAccount, StorageException}
 import com.microsoft.azure.storage.blob.{CloudBlobClient, CloudBlobContainer, CloudBlockBlob}
+import org.apache.commons.httpclient.HttpClient
+import org.apache.commons.httpclient.methods.GetMethod
 
 import scala.io.Source
 import scalaj.http.{Http, HttpOptions}
@@ -84,8 +87,46 @@ object AzureStorageUtils {
     })
   }
 
+  def  javaGet(url:String): Unit ={
+    System.setProperty("javax.net.ssl.trustStore",
+      "C:\\Program Files\\Java\\jre1.8.0_101\\lib\\security\\cacerts")
+    System.setProperty("javax.net.ssl.trustStorePassword", "changeit")
+    System.setProperty("javax.net.ssl.trustStoreType", "JKS")
+    System.setProperty("javax.net.debug","ssl")
+    //my certificate and password
+    System.setProperty("javax.net.ssl.keyStore",
+      "C:\\Users\\marhamil\\Documents\\Spark\\SparkTesting\\test000.azuremlidentity.cloudapp.net.pfx")
+    System.setProperty("javax.net.ssl.keyStorePassword", "AzureMLCertific8")
+    System.setProperty("javax.net.ssl.keyStoreType", "PKCS12")
 
-  def postJSON(jsonString: String, url: String, host: String, auth: String): Unit = {
+    val httpclient = new HttpClient()
+
+    val method = new GetMethod()
+    method.setPath(url)
+
+    val statusCode = httpclient.executeMethod(method)
+    System.out.println("Status: " + statusCode)
+
+    method.releaseConnection()
+
+    method.getResponseBodyAsString()
+  }   //default truststore parameters
+
+
+  def postJSON(jsonString: String, url: String, host: String): Unit = {
+    System.setProperty("javax.net.ssl.trustStore",
+      "C:\\Program Files\\Java\\jre1.8.0_101\\lib\\security\\cacerts")
+    System.setProperty("javax.net.ssl.trustStorePassword", "changeit")
+    System.setProperty("javax.net.ssl.trustStoreType", "JKS")
+
+    //my certificate and password
+    System.setProperty("javax.net.ssl.keyStore",
+      "C:\\Users\\marhamil\\Documents\\Spark\\SparkTesting\\test000.azuremlidentity.cloudapp.net.pfx")
+    System.setProperty("javax.net.ssl.keyStorePassword", "AzureMLCertific8")
+    System.setProperty("javax.net.ssl.keyStoreType", "PKCS12")
+    val sslsocketfactory = SSLSocketFactory.getDefault
+
+
     val result = Http(url).postData(jsonString)
       .header("Content-Type", "application/json")
       .header("Charset", "UTF-8")
@@ -148,19 +189,19 @@ object AzureStorageUtils {
   def main(args: Array[String]): Unit = {
     val dataRoot = "D:\\Data\\Text\\"
     val files = List("100", "1000", "10000").map(dataRoot + "small_data_" + _)
-    zip(dataRoot + "zipped_data.zip", files)
+    //zip(dataRoot + "zipped_data.zip", files)
 
-    uploadFileToStorage(
-      dataRoot + "small_data_1000",
-      "azureml/drivers/Mark/small_data_1000",
-      "moprescustorage",
-      "dHFkMMb/y4iKj0p9QMeoUcFonE7ObA1fkWroADzlvqREk9XljmSM+LuKiz4nXMIUQykCn1NgWBjvYJSaw57IDA==",
-      "moprescuspark"
-    )
+    //uploadFileToStorage(
+    //  dataRoot + "small_data_1000",
+    //  "azureml/drivers/Mark/small_data_1000",
+    //  "moprescustorage",
+    //  "dHFkMMb/y4iKj0p9QMeoUcFonE7ObA1fkWroADzlvqREk9XljmSM+LuKiz4nXMIUQykCn1NgWBjvYJSaw57IDA==",
+    //  "moprescuspark"
+    //)
 
     val url = "https://rdscurrent.azureml-test.net/palettes/definitions"
     val host = "rdscurrent.azureml-test.net"
     val jsonString = scala.io.Source.fromFile("Test_Palette_Request.txt").mkString
-
+    javaGet(url)
   }
 }
