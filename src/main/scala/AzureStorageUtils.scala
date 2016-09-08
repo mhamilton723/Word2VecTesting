@@ -1,10 +1,11 @@
 import java.io.{File, FileInputStream, FileNotFoundException}
+import java.net.{InetAddress, Socket}
 import javax.net.ssl.SSLSocketFactory
 
 import com.microsoft.azure.storage.{CloudStorageAccount, StorageException}
 import com.microsoft.azure.storage.blob.{CloudBlobClient, CloudBlobContainer, CloudBlockBlob}
 import org.apache.commons.httpclient.HttpClient
-import org.apache.commons.httpclient.methods.GetMethod
+import org.apache.commons.httpclient.methods.{GetMethod, PostMethod}
 
 import scala.io.Source
 import scalaj.http.{Http, HttpOptions}
@@ -87,7 +88,7 @@ object AzureStorageUtils {
     })
   }
 
-  def  javaGet(url:String): Unit ={
+  def  javaGet(body:String,url:String,host:String): Unit ={
     System.setProperty("javax.net.ssl.trustStore",
       "C:\\Program Files\\Java\\jre1.8.0_101\\lib\\security\\cacerts")
     System.setProperty("javax.net.ssl.trustStorePassword", "changeit")
@@ -101,8 +102,13 @@ object AzureStorageUtils {
 
     val httpclient = new HttpClient()
 
-    val method = new GetMethod()
+    val method = new PostMethod()
     method.setPath(url)
+    method.setRequestHeader("Content-Type", "application/json")
+    method.setRequestHeader("Charset", "UTF-8")
+    method.setRequestHeader("Host", host)
+    method.setRequestHeader("Expect", "100-continue")
+    method.setRequestBody(body)
 
     val statusCode = httpclient.executeMethod(method)
     System.out.println("Status: " + statusCode)
@@ -124,7 +130,9 @@ object AzureStorageUtils {
       "C:\\Users\\marhamil\\Documents\\Spark\\SparkTesting\\test000.azuremlidentity.cloudapp.net.pfx")
     System.setProperty("javax.net.ssl.keyStorePassword", "AzureMLCertific8")
     System.setProperty("javax.net.ssl.keyStoreType", "PKCS12")
-    val sslsocketfactory = SSLSocketFactory.getDefault
+
+
+    val sslsocketfactory = SSLSocketFactory.getDefault.asInstanceOf[SSLSocketFactory]
 
 
     val result = Http(url).postData(jsonString)
@@ -133,7 +141,10 @@ object AzureStorageUtils {
       .header("Host", host)
       .header("Expect", "100-continue")
       .header("Connection", "Keep-Alive")
-      .option(HttpOptions.readTimeout(10000)).asString
+      .option(HttpOptions.readTimeout(10000))
+      .option(HttpOptions.sslSocketFactory(sslsocketfactory)).asString
+
+    print("here")
   }
 
 
@@ -202,6 +213,7 @@ object AzureStorageUtils {
     val url = "https://rdscurrent.azureml-test.net/palettes/definitions"
     val host = "rdscurrent.azureml-test.net"
     val jsonString = scala.io.Source.fromFile("Test_Palette_Request.txt").mkString
-    javaGet(url)
+    javaGet(jsonString,url,host)
+    //postJSON(jsonString,url,host)
   }
 }
