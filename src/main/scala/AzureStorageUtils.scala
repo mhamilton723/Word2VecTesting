@@ -29,10 +29,10 @@ object AzureStorageUtils {
     }
 
   def submitJobsToCluster(argList: List[(String, List[Any])],
-                          authorization:String,
-                          jarPath:String = "wasb:///azureml/drivers/Mark/Spark2Word2Vec-assembly-1.0.jar",
-                          className:String = "Word2VecTest",
-                          clusterName:String = "moprescuspark"
+                          authorization: String,
+                          jarPath: String = "wasb:///azureml/drivers/Mark/Spark2Word2Vec-assembly-1.0.jar",
+                          className: String = "Word2VecTest",
+                          clusterName: String = "moprescuspark"
                          ): Unit = {
 
 
@@ -84,18 +84,19 @@ object AzureStorageUtils {
     })
   }
 
-  def postJSON(jsonString:String,url:String, host:String): Unit = {
-      val result = Http(url).postData(jsonString)
-        .header("Content-Type", "application/json")
-        .header("Charset", "UTF-8")
-        .header("Host", host)
-        .header("Expect", "100-continue")
-        .header("Connection", "Keep-Alive")
-          .
-        .option(HttpOptions.readTimeout(10000)).asString
+
+  def postJSON(jsonString: String, url: String, host: String, auth: String): Unit = {
+    val result = Http(url).postData(jsonString)
+      .header("Content-Type", "application/json")
+      .header("Charset", "UTF-8")
+      .header("Host", host)
+      .header("Expect", "100-continue")
+      .header("Connection", "Keep-Alive")
+      .option(HttpOptions.readTimeout(10000)).asString
   }
 
-  def uploadFileToStorage(pathToFile:String,nameOfUpload:String,accountName:String,accountKey:String,containerName:String) = {
+
+  def uploadFileToStorage(pathToFile: String, nameOfUpload: String, accountName: String, accountKey: String, containerName: String) = {
 
     val storageConnectionString: String = "DefaultEndpointsProtocol=http;" +
       s"AccountName=$accountName;" +
@@ -144,13 +145,13 @@ object AzureStorageUtils {
     }
   }
 
-  def main(args:Array[String]): Unit ={
-    val dataRoot= "C:\\Users\\marhamil\\Documents\\Data\\training-monolingual-europarl\\"
-    val files = List("100","1000","10000").map(dataRoot+"small_data_"+_)
-    zip(dataRoot+"zipped_data.zip",files)
+  def main(args: Array[String]): Unit = {
+    val dataRoot = "D:\\Data\\Text\\"
+    val files = List("100", "1000", "10000").map(dataRoot + "small_data_" + _)
+    zip(dataRoot + "zipped_data.zip", files)
 
     uploadFileToStorage(
-      dataRoot+"small_data_1000",
+      dataRoot + "small_data_1000",
       "azureml/drivers/Mark/small_data_1000",
       "moprescustorage",
       "dHFkMMb/y4iKj0p9QMeoUcFonE7ObA1fkWroADzlvqREk9XljmSM+LuKiz4nXMIUQykCn1NgWBjvYJSaw57IDA==",
@@ -159,12 +160,7 @@ object AzureStorageUtils {
 
     val url = "https://rdscurrent.azureml-test.net/palettes/definitions"
     val host = "rdscurrent.azureml-test.net"
-    val jsonString = scala.io.Source.fromFile("tempPalette.json").mkString
-
-    postJSON(jsonString,url,host)
+    val jsonString = scala.io.Source.fromFile("Test_Palette_Request.txt").mkString
 
   }
-
 }
-
-

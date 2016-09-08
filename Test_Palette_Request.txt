@@ -1,0 +1,698 @@
+{
+  "MajorVersion": "49687BE0-C407-44A1-AB8B-7F24446B46C3",
+  "MinorVersion": "9BCD0039-7C6B-4671-9ED9-62C7C4545780",
+  "PaletteName": "PySpark",
+  "AtomicTypes": [
+    {
+      "BaseTypes": null,
+      "Id": "a5f9e739-660d-4192-a974-186014cc221e",
+      "ReferenceName": "str",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    },
+    {
+      "BaseTypes": null,
+      "Id": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+      "ReferenceName": "int",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    },
+    {
+      "BaseTypes": null,
+      "Id": "77536e93-c68c-4abe-b694-033535b200d5",
+      "ReferenceName": "float",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    },
+    {
+      "BaseTypes": null,
+      "Id": "58fc4791-1c8f-4999-81cb-d753fca5a6ca",
+      "ReferenceName": "RDD",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    },
+    {
+      "BaseTypes": [
+        "58fc4791-1c8f-4999-81cb-d753fca5a6ca"
+      ],
+      "Id": "24018699-7d27-46b1-8aa7-9321a08a4184",
+      "ReferenceName": "DataFrame",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    },
+    {
+      "BaseTypes": null,
+      "Id": "d5447680-ecc2-4118-908a-2503c3675b69",
+      "ReferenceName": "Model",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    }
+  ],
+  "EnumerationTypes": [
+    {
+      "Values": [
+        "RandomForest",
+        "LogisticRegression",
+        "MultilayerPerceptron"
+      ],
+      "Id": "878f8290-7efe-4915-b10e-f918a5c7ac21",
+      "ReferenceName": "str",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    },
+    {
+      "Values": [
+        "precision",
+        "weightedPrecision",
+        "recall",
+        "weightedRecall",
+        "f1"
+      ],
+      "Id": "05a9ac0c-bfb3-44f8-9913-8d326bff987a",
+      "ReferenceName": "str",
+      "AvailableActions": null,
+      "TransformationMethod": null
+    }
+  ],
+  "CollectionTypes": [],
+  "FunctionTypes": [],
+  "ImplicitTypeConversions": [],
+  "Functions": [
+    {
+      "Id": "581f6d53-9c17-48a9-8a54-ca91be69ac60",
+      "ReferenceName": "classify_and_score",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{model}, {scored_test_data}, {evaluation_result} = classify.classify({dataframe}, {model_name}, {feature_columns}, {label_column}, {training_size}, {num_iterations}, {num_layers}, {reg_param}, {elasticNet_param}, {num_trees}, {max_depth}, {evaluation_metric})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "96a916be-c61c-4d0c-9766-c0beb4662e40",
+          "ReferenceName": "model_name",
+          "UxControl": "Enumerated",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "878f8290-7efe-4915-b10e-f918a5c7ac21",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "d336af70-c7e4-42f4-9028-7f884ad6a734",
+          "ReferenceName": "feature_columns",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "cdcd8ddc-364a-44b3-a221-fef3ce28fa37",
+          "ReferenceName": "label_column",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "d0d71efd-a9ae-4ec8-a369-ce2b444141ba",
+          "ReferenceName": "training_size",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "0.6",
+          "Type": "77536e93-c68c-4abe-b694-033535b200d5",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "215a7910-01ec-44bc-bc7f-c67af124ea3a",
+          "ReferenceName": "num_iterations",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "2",
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": [
+            [
+              {
+                "Type": "ParameterValueEquality",
+                "VariableId": "96a916be-c61c-4d0c-9766-c0beb4662e40",
+                "Values": [
+                  "MultilayerPerceptron",
+                  "LogisticRegression"
+                ]
+              }
+            ]
+          ],
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "7cc9d384-9491-4b26-a49a-4065ea7ddceb",
+          "ReferenceName": "num_layers",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "2",
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": [
+            [
+              {
+                "Type": "ParameterValueEquality",
+                "VariableId": "96a916be-c61c-4d0c-9766-c0beb4662e40",
+                "Values": [
+                  "MultilayerPerceptron"
+                ]
+              }
+            ]
+          ],
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "515c6826-3a50-471c-8bb2-612d93fb05fb",
+          "ReferenceName": "reg_param",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "0.3",
+          "Type": "77536e93-c68c-4abe-b694-033535b200d5",
+          "Relevancy": [
+            [
+              {
+                "Type": "ParameterValueEquality",
+                "VariableId": "96a916be-c61c-4d0c-9766-c0beb4662e40",
+                "Values": [
+                  "LogisticRegression"
+                ]
+              }
+            ]
+          ],
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "b5c4ddc2-4be7-43a9-b810-7785dd1c6773",
+          "ReferenceName": "elasticNet_param",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "0.8",
+          "Type": "77536e93-c68c-4abe-b694-033535b200d5",
+          "Relevancy": [
+            [
+              {
+                "Type": "ParameterValueEquality",
+                "VariableId": "96a916be-c61c-4d0c-9766-c0beb4662e40",
+                "Values": [
+                  "LogisticRegression"
+                ]
+              }
+            ]
+          ],
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "d05e87d2-0efd-4f17-9a57-b4f271bc2ed2",
+          "ReferenceName": "num_trees",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "3",
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": [
+            [
+              {
+                "Type": "ParameterValueEquality",
+                "VariableId": "96a916be-c61c-4d0c-9766-c0beb4662e40",
+                "Values": [
+                  "RandomForest"
+                ]
+              }
+            ]
+          ],
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "8931e026-a771-4185-826b-660a39cca3cc",
+          "ReferenceName": "max_depth",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "2",
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": [
+            [
+              {
+                "Type": "ParameterValueEquality",
+                "VariableId": "96a916be-c61c-4d0c-9766-c0beb4662e40",
+                "Values": [
+                  "RandomForest"
+                ]
+              }
+            ]
+          ],
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "128a2dcc-5d25-470c-bab2-7ca602b530f0",
+          "ReferenceName": "evaluation_metric",
+          "UxControl": "Enumerated",
+          "UxControlArguments": null,
+          "DefaultValue": "precision",
+          "Type": "05a9ac0c-bfb3-44f8-9913-8d326bff987a",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "b5a9e921-924d-4ba5-833d-7d15cf7cc78a",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b6a9e921-924d-4ba5-833d-7d15cf7cc78a",
+          "ReferenceName": "scored_test_data",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "b7a9e921-924d-4ba5-833d-7d15cf7cc78a",
+          "ReferenceName": "evaluation_result",
+          "Type": "77536e93-c68c-4abe-b694-033535b200d5",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "b8a9e921-924d-4ba5-833d-7d15cf7cc78a",
+          "ReferenceName": "model",
+          "Type": "d5447680-ecc2-4118-908a-2503c3675b69",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": [
+        "from azureml import classify"
+      ]
+    },
+    {
+      "Id": "2237d202-a0f7-49fa-956a-82adadf3771f",
+      "ReferenceName": "feature_hashing",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{augmented_input}, {feature_vector} = feature_hashing.feature_hash({dataframe}, {columns}, {numFeatures}, {outputCol})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "c60c24d8-81b1-4bfa-99a6-eaf69327fde0",
+          "ReferenceName": "columns",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "70f83fd3-972e-44b8-8dec-9f16424b4e46",
+          "ReferenceName": "numFeatures",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": "1000",
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "03377d31-5527-4e53-891b-8a05125e35f1",
+          "ReferenceName": "outputCol",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "9214411f-773a-407a-90a0-8b55a7666537",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "d82ce6f9-70e9-45d4-9c61-28a02e1b6add",
+          "ReferenceName": "augmented_input",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "adbb3dd9-0553-4a94-8a00-aa59bddc1de8",
+          "ReferenceName": "feature_vector",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": [
+        "from azureml import feature_hashing"
+      ]
+    },
+    {
+      "Id": "0785b1a3-bc5f-43d7-a44f-32fb16484397",
+      "ReferenceName": "split",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{first_output}, {second_output} = split.split({dataframe}, {first_size}, {second_size}, {seed})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "34e97a2b-6987-4644-8085-f3c744b3b4d1",
+          "ReferenceName": "first_size",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "77536e93-c68c-4abe-b694-033535b200d5",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "b8fbe5a9-9c29-43ba-9ae6-55e62f493976",
+          "ReferenceName": "second_size",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "77536e93-c68c-4abe-b694-033535b200d5",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "fb8367c6-c074-4174-95c0-de533f9bad6b",
+          "ReferenceName": "seed",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "11de5289-7693-4312-944c-83a81f923fc1",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "0965fc9b-2470-40a2-8add-c68607cf8fce",
+          "ReferenceName": "first_output",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "bb3f6b18-22ae-4e95-af30-db312bb16293",
+          "ReferenceName": "second_output",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": [
+        "from azureml import split"
+      ]
+    },
+    {
+      "Id": "43f282be-6ecc-423b-8826-6b6d43e32653",
+      "ReferenceName": "sample",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{result} = sample.sample_data({dataframe}, {fraction}, {seed})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "33f58f2f-bdaa-4a52-8a7b-540695d9c32a",
+          "ReferenceName": "fraction",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "77536e93-c68c-4abe-b694-033535b200d5",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        },
+        {
+          "Id": "4152bcf2-9846-420e-97dd-1636e0698b92",
+          "ReferenceName": "seed",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "538980f8-64a2-481d-90a3-e5504e2e2164",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "e69cbd46-79bd-4cb6-a2b1-8c9f8316df59",
+          "ReferenceName": "result",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": [
+        "from azureml import sample"
+      ]
+    },
+    {
+      "Id": "12dac743-6256-47e1-ab8c-26cd3115efa6",
+      "ReferenceName": "read_parquet",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{result} = sql_context.read.parquet({path})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "0f8e0759-515b-4748-aa36-44e6d0c29d84",
+          "ReferenceName": "path",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "659072cc-a665-4e73-84ff-f9b895cb11fe",
+          "ReferenceName": "result",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": []
+    },
+    {
+      "Id": "681ee29b-f2cb-48c7-a638-ec280bec48f5",
+      "ReferenceName": "select_columns",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{result} = column_selection.select_columns({columns}, {dataframe})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "b7b489dc-d94d-4657-95a5-974dea65f0d3",
+          "ReferenceName": "columns",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "c24cdb3e-f678-4167-a348-d723b1eae0e3",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "4e7f775f-5d35-4c6c-8850-a23b0258c848",
+          "ReferenceName": "result",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": [
+        "from azureml import column_selection"
+      ]
+    },
+    {
+      "Id": "6e8ce7da-04cb-4ec6-a984-003d58abc98a",
+      "ReferenceName": "drop_columns",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{result} = column_selection.drop_columns({columns}, {dataframe})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "b4cedc45-24e5-4adf-ae45-b329f9d3b9aa",
+          "ReferenceName": "columns",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "6f958f22-3168-4d89-9757-c61f800e39d8",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "d4784399-f4eb-4b83-baff-1aa1665176d6",
+          "ReferenceName": "result",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": [
+        "from azureml import column_selection"
+      ]
+    },
+    {
+      "Id": "0bdffa4e-c0ee-47d9-a384-cae7e83f569b",
+      "ReferenceName": "describe",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{result} = {dataframe}.describe({columnName})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "93dd4851-d6e0-45f2-9d59-2d345a14f642",
+          "ReferenceName": "columnName",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "a5f9e739-660d-4192-a974-186014cc221e",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "229ba5da-81db-4011-b682-056f1b4ff2b6",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "59a7d773-a40e-4be5-9d06-be57d733d415",
+          "ReferenceName": "result",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Dependencies": [
+        "from pyspark.sql import DataFrame"
+      ]
+    },
+    {
+      "Id": "A35180D9-7C97-47ED-BEA7-AA346BAC60A8",
+      "ReferenceName": "dev_show",
+      "Platform": "PySpark_Platform",
+      "EntryPoint": "{dataframe}.show({count})",
+      "Exposure": "Public",
+      "Parameters": [
+        {
+          "Id": "d9dd70fd-38c5-4731-98a6-c41bdc4b3162",
+          "ReferenceName": "count",
+          "UxControl": "String",
+          "UxControlArguments": null,
+          "DefaultValue": null,
+          "Type": "6e182490-9d90-4fc3-b4d8-7d0dc23f44d6",
+          "Relevancy": null,
+          "Constraints": null,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Inputs": [
+        {
+          "Id": "485c8b59-6280-494d-af83-bd40f30d28b3",
+          "ReferenceName": "dataframe",
+          "Type": "24018699-7d27-46b1-8aa7-9321a08a4184",
+          "IsOptional": false,
+          "ValueGenerationMethod": null
+        }
+      ],
+      "Outputs": [],
+      "Dependencies": []
+    }
+  ],
+  "GroupBaseTypes": null,
+  "Platforms": [
+    {
+      "Name": "Python",
+      "PlatformVersion": null,
+      "PlatformAssets": [
+        "https://wbaumannstorage.blob.core.windows.net/sparkdependencies/vanillavectorassembler_2.10-1.0.0.jar?st=2016-07-22T16%3A32%3A00Z&se=2030-07-23T16%3A32%3A00Z&sp=rl&sv=2015-04-05&sr=b&sig=grPu6jDlY71DflYPY8db3BcYXj5UsfVnTXmNVWB9WYA%3D",
+        "https://wbaumannstorage.blob.core.windows.net/sparkdependencies/azureml.zip?sv=2015-02-21&sr=b&sig=Z%2FKF9%2BZA2dd34IC8IFLpAxFP66odb0rQ0lcE2trObkQ%3D&st=2016-08-03T21%3A49%3A47Z&se=2026-08-03T21%3A49%3A47Z&sp=r"
+      ],
+      "ProvisionableAssets": null
+    }
+  ],
+  "MandatoryAssets": null
+}
