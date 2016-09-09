@@ -9,7 +9,6 @@ import scopt.OptionParser
 
 //import org.apache.spark.implicits._
 
-
 /**
   * Created by marhamil on 8/9/2016.
   */
@@ -25,18 +24,16 @@ object Word2VecTest {
   val parser = new OptionParser[Config]("scopt") {
     head("Word2VecTest", "0.1")
 
-    opt[String]("fileName").action((x, c) =>
-      c.copy(fileName = x)).text("Embedding Filename")
-    opt[Int]("nDim").action((x, c) =>
-      c.copy(nDim = x)).text("Number of embedding dimension")
-    opt[Int]("minCount").action((x, c) =>
-      c.copy(minCount = x)).text("Min number of words to be included in embedding")
-    opt[Int]("nPart").action((x, c) =>
-      c.copy(nPart = x)).text("Number of parallel jobs")
-    opt[Int]("nIter").action((x, c) =>
-      c.copy(nIter = x)).text("Number of iterations")
-    opt[String]("environment").action((x, c) =>
-      c.copy(environment = x)).text("sets the app to run in a specific environment options local,moprescuspark,cluster")
+    opt[String]("fileName").action((x, c) => c.copy(fileName = x)).text("Embedding Filename")
+    opt[Int]("nDim").action((x, c) => c.copy(nDim = x)).text("Number of embedding dimension")
+    opt[Int]("minCount")
+      .action((x, c) => c.copy(minCount = x))
+      .text("Min number of words to be included in embedding")
+    opt[Int]("nPart").action((x, c) => c.copy(nPart = x)).text("Number of parallel jobs")
+    opt[Int]("nIter").action((x, c) => c.copy(nIter = x)).text("Number of iterations")
+    opt[String]("environment")
+      .action((x, c) => c.copy(environment = x))
+      .text("sets the app to run in a specific environment options local,moprescuspark,cluster")
 
   }
 
@@ -47,34 +44,32 @@ object Word2VecTest {
 
     parser.parse(args, Config()) match {
       case Some(config) =>
+        var master: String    = null
+        var dataRoot: String  = null
+        var saveRoot: String  = null
+        var warehouse: String = null
 
-        var master:String = null
-        var dataRoot:String = null
-        var saveRoot:String = null
-        var warehouse:String = null
-
-        if (config.environment=="local"){
-          master="local[*]"
-          warehouse="file:///C:/users/marhamil/IdeaProjects/Spark2Word2Vec/my/"
-          dataRoot= "D:/Data/Text/"
+        if (config.environment == "local") {
+          master = "local[*]"
+          warehouse = "file:///C:/users/marhamil/IdeaProjects/Spark2Word2Vec/my/"
+          dataRoot = "D:/Data/Text/"
           saveRoot = "D:/Data/fit_embeddings/"
-        }else if (config.environment=="cluster"){
-          master="yarn-cluster"
-          warehouse= "wasb:///azureml/drivers/Mark"
-          dataRoot ="wasb:///azureml/drivers/Mark/text_data/"
+        } else if (config.environment == "cluster") {
+          master = "yarn-cluster"
+          warehouse = "wasb:///azureml/drivers/Mark"
+          dataRoot = "wasb:///azureml/drivers/Mark/text_data/"
           saveRoot = "wasb:///azureml/drivers/Mark/fit_embeddings/"
-        }else if (config.environment=="moprescuspark"){
-          master="local[*]"
+        } else if (config.environment == "moprescuspark") {
+          master = "local[*]"
           warehouse = "/home/hdiuser/IdeaProjects/SparkWord2Vec/my/"
           dataRoot = "/home/hdiuser/Data/Text/"
           saveRoot = "/home/hdiuser/Data/fit_embeddings/"
-        }else{
-          throw new IllegalArgumentException(" not a proper environment: "+config.environment)
+        } else {
+          throw new IllegalArgumentException(" not a proper environment: " + config.environment)
         }
 
-        println((master,warehouse))
-        val spark = SparkSession
-          .builder
+        println((master, warehouse))
+        val spark = SparkSession.builder
           .master(master)
           .appName("My App")
           .config("driver-memory", "10g")
@@ -88,31 +83,34 @@ object Word2VecTest {
         LogManager.getRootLogger.setLevel(Level.WARN)
         import spark.implicits._
 
-
         //FOOFS
-        val loadModel = false
+        val loadModel   = false
         val runWord2Vec = true
-        val saveModel = true
+        val saveModel   = true
 
-        def genFileName(root: String, prefix:String="embeddings",extension:String=".json"): String = {
+        def genFileName(root: String,
+                        prefix: String = "embeddings",
+                        extension: String = ".json"): String = {
           val middle = "_fn_" + config.fileName +
-            "_minCount_" + config.minCount +
-            "_nPart_" + config.nPart + "_nIter_" + config.nIter
-            root + prefix + middle + extension
+              "_minCount_" + config.minCount +
+              "_nPart_" + config.nPart + "_nIter_" + config.nIter
+          root + prefix + middle + extension
         }
 
         //MAIN CODE
         val logFile = dataRoot + config.fileName
-        val sentenceDF = spark.read.textFile(logFile)
+        val sentenceDF = spark.read
+          .textFile(logFile)
           .map(s => "http:\\/\\/.*".r.replaceAllIn(s, " url "))
           .map(s => "(\\d{5,})".r.replaceAllIn(s, " num "))
           .filter(s => !s.startsWith("CURRENT URL"))
-          .flatMap(s=>s.split("\\.|\\!|\\?"))
+          .flatMap(s => s.split("\\.|\\!|\\?"))
           .filter(s => !s.contains("| Next chapter | | Previous chapter |"))
           .toDF("text")
         //sentenceDF.show(10,truncate = false)
 
-        val tokenizer = new RegexTokenizer().setInputCol("text").setOutputCol("tokens").setPattern("\\W")
+        val tokenizer =
+          new RegexTokenizer().setInputCol("text").setOutputCol("tokens").setPattern("\\W")
         val tokenized = tokenizer.transform(sentenceDF) //.select('tokens).where('tokens)
         tokenized.show(5)
         //tokenized.printSchema()
@@ -125,13 +123,15 @@ object Word2VecTest {
         val removed = remover.transform(tokenized) //.distinct() this causes memory leaks for some reason
         //removed.show(5,truncate = false)
 
-
         if (runWord2Vec) {
           println("Starting word2vec")
           val word2Vec = new Word2Vec()
-            .setInputCol("filtered_tokens").setOutputCol("embeddings")
-            .setVectorSize(config.nDim).setMinCount(config.minCount)
-            .setNumPartitions(config.nPart).setMaxIter(config.nIter)
+            .setInputCol("filtered_tokens")
+            .setOutputCol("embeddings")
+            .setVectorSize(config.nDim)
+            .setMinCount(config.minCount)
+            .setNumPartitions(config.nPart)
+            .setMaxIter(config.nIter)
           val model = if (loadModel) {
             Word2VecModel.load(genFileName(saveRoot))
           } else {
@@ -152,20 +152,21 @@ object Word2VecTest {
           }
 
           //PRINT LIST OF SYNONYMS
-          val target_words = List("cat", "blue", "how", "can", "africa", "try", "ten", "two")
+          val target_words =
+            List("cat", "blue", "how", "can", "africa", "try", "ten", "two")
           for (word <- target_words) {
             try {
               val synonymns = model.findSynonyms(word, 5)
               println(word + " in vocab:")
               synonymns.show(5)
             } catch {
-              case e: java.lang.IllegalStateException => println(word + " not in vocab")
+              case e: java.lang.IllegalStateException =>
+                println(word + " not in vocab")
             }
           }
         }
 
       case None =>
-
       // arguments are bad, error message will have been displayed
     }
   }

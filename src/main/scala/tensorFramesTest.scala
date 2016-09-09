@@ -1,4 +1,4 @@
-
+/*
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.ml.feature._
@@ -43,3 +43,4 @@ object tensorFramesTest extends App{
   df2.show()
 
 }
+*/
