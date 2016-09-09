@@ -1,4 +1,4 @@
-/*
+
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.ml.feature._
@@ -40,7 +40,6 @@ object tensorFramesTest extends App{
   }
 
   // The transform is all lazy at this point, let's execute it with collect:
-  //df2.collect()
+  df2.show()
 
 }
-*/
