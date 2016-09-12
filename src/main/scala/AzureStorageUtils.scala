@@ -1,16 +1,19 @@
-import java.io.{File, FileInputStream, FileNotFoundException}
-import java.lang.Enum
-import java.net.{InetAddress, Socket}
-import java.util
-import javax.net.ssl.SSLSocketFactory
 
-import com.microsoft.azure.storage.{CloudStorageAccount, StorageException}
+import java.io.{File, FileInputStream}
+import java.util.Calendar
+
+import FolderZiper.zipFolder
+import com.microsoft.azure.storage.CloudStorageAccount
 import com.microsoft.azure.storage.blob._
 import org.apache.commons.httpclient.HttpClient
-import org.apache.commons.httpclient.methods.{GetMethod, PostMethod}
+import org.apache.commons.httpclient.methods.{PostMethod, StringRequestEntity}
+import org.apache.commons.io.FileUtils
+import spray.json.DefaultJsonProtocol._
+import spray.json._
 
 import scala.io.Source
 import scalaj.http.{Http, HttpOptions}
+
 
 /**
   * Created by marhamil on 9/8/2016.
@@ -21,19 +24,20 @@ object AzureStorageUtils {
     argList.map {
       case (key: String, value: Boolean) if value => " \"--" + key + "\""
       case (key: String, value: Boolean) if value => ""
-      case (key: String, value: Any)              => " \"--" + key + "\", \"" + value.toString + "\""
+      case (key: String, value: Any) => " \"--" + key + "\", \"" + value.toString + "\""
     }.foldLeft("")((left, add) => left + " " + add + ",").dropRight(1)
   }
 
-  private def combine[A](xs: Traversable[Traversable[A]]): Seq[Seq[A]] =
+  private def combine[A](xs: Traversable[Traversable[A]]): Seq[Seq[A]] = {
     xs.foldLeft(Seq(Seq.empty[A])) { (x, y) =>
       for (a <- x.view; b <- y) yield a :+ b
     }
+  }
 
   def submitJobsToCluster(argList: List[(String, List[Any])],
                           authorization: String,
                           jarPath: String =
-                            "wasb:///azureml/drivers/Mark/Spark2Word2Vec-assembly-1.0.jar",
+                          "wasb:///azureml/drivers/Mark/Spark2Word2Vec-assembly-1.0.jar",
                           className: String = "Word2VecTest",
                           clusterName: String = "moprescuspark"): Unit = {
 
@@ -71,8 +75,7 @@ object AzureStorageUtils {
            |
       """.stripMargin
 
-      val result =
-        Http(s"https://$clusterName.azurehdinsight.net/livy/batches")
+      Http(s"https://$clusterName.azurehdinsight.net/livy/batches")
           .postData(data)
           .header("Content-Type", "application/json")
           .header("Charset", "UTF-8")
@@ -87,16 +90,14 @@ object AzureStorageUtils {
     })
   }
 
-  def javaGet(body: String, url: String, host: String): Unit = {
+  def postJSON(body: String, url: String, host: String, keyFile: String): Unit = {
     System.setProperty("javax.net.ssl.trustStore",
-                       "C:\\Program Files\\Java\\jre1.8.0_101\\lib\\security\\cacerts")
+      "C:\\Program Files\\Java\\jre1.8.0_101\\lib\\security\\cacerts")
     System.setProperty("javax.net.ssl.trustStorePassword", "changeit")
     System.setProperty("javax.net.ssl.trustStoreType", "JKS")
     System.setProperty("javax.net.debug", "ssl")
     //my certificate and password
-    System.setProperty(
-      "javax.net.ssl.keyStore",
-      "C:\\Users\\marhamil\\Documents\\Spark\\SparkTesting\\test000.azuremlidentity.cloudapp.net.pfx")
+    System.setProperty("javax.net.ssl.keyStore", keyFile)
     System.setProperty("javax.net.ssl.keyStorePassword", "AzureMLCertific8")
     System.setProperty("javax.net.ssl.keyStoreType", "PKCS12")
 
@@ -108,7 +109,7 @@ object AzureStorageUtils {
     method.setRequestHeader("Charset", "UTF-8")
     method.setRequestHeader("Host", host)
     method.setRequestHeader("Expect", "100-continue")
-    method.setRequestBody(body)
+    method.setRequestEntity(new StringRequestEntity(body, "application/json", "UTF-8"))
 
     val statusCode = httpclient.executeMethod(method)
     System.out.println("Status: " + statusCode)
@@ -116,47 +117,18 @@ object AzureStorageUtils {
     method.releaseConnection()
 
     method.getResponseBodyAsString()
-  } //default truststore parameters
+  } //default trust store parameters
 
-  def postJSON(jsonString: String, url: String, host: String): Unit = {
-    System.setProperty("javax.net.ssl.trustStore",
-                       "C:\\Program Files\\Java\\jre1.8.0_101\\lib\\security\\cacerts")
-    System.setProperty("javax.net.ssl.trustStorePassword", "changeit")
-    System.setProperty("javax.net.ssl.trustStoreType", "JKS")
-
-    //my certificate and password
-    System.setProperty(
-      "javax.net.ssl.keyStore",
-      "C:\\Users\\marhamil\\Documents\\Spark\\SparkTesting\\test000.azuremlidentity.cloudapp.net.pfx")
-    System.setProperty("javax.net.ssl.keyStorePassword", "AzureMLCertific8")
-    System.setProperty("javax.net.ssl.keyStoreType", "PKCS12")
-
-    val sslsocketfactory =
-      SSLSocketFactory.getDefault.asInstanceOf[SSLSocketFactory]
-
-    val result = Http(url)
-      .postData(jsonString)
-      .header("Content-Type", "application/json")
-      .header("Charset", "UTF-8")
-      .header("Host", host)
-      .header("Expect", "100-continue")
-      .header("Connection", "Keep-Alive")
-      .option(HttpOptions.readTimeout(10000))
-      .option(HttpOptions.sslSocketFactory(sslsocketfactory))
-      .asString
-
-    print("here")
-  }
 
   def uploadFileToStorage(pathToFile: String,
                           nameOfUpload: String,
                           accountName: String,
                           accountKey: String,
-                          containerName: String) = {
+                          containerName: String): String = {
 
     val storageConnectionString: String = "DefaultEndpointsProtocol=http;" +
-        s"AccountName=$accountName;" +
-        s"AccountKey=$accountKey"
+      s"AccountName=$accountName;" +
+      s"AccountKey=$accountKey"
 
     val account: CloudStorageAccount =
       CloudStorageAccount.parse(storageConnectionString)
@@ -164,38 +136,38 @@ object AzureStorageUtils {
 
     // Container name must be lower case.
     val container: CloudBlobContainer =
-      serviceClient.getContainerReference(containerName)
+    serviceClient.getContainerReference(containerName)
     container.createIfNotExists
 
 
     // Upload an file.
     val blob: CloudBlockBlob = container.getBlockBlobReference(nameOfUpload)
-    val sourceFile: File     = new File(pathToFile)
+    val sourceFile: File = new File(pathToFile)
     blob.upload(new FileInputStream(sourceFile), sourceFile.length)
 
-
-    println(getContainerSasUri(blob))
-    //"https://wbaumannstorage.blob.core.windows.net/sparkdependencies/vanillavectorassembler_2.11-1.0.0.jar?st=2016-08-29T22%3A40%3A00Z&se=2030-08-30T22%3A40%3A00Z&sp=rl&sv=2015-04-05&sr=b&sig=0gAFos%2Fdh79nZoRObWqH0FMPJBVnPz2lzIa2YhbT%2Blc%3D"
-
+    getContainerSasUri(blob)
   }
 
-  def getContainerSasUri(container:CloudBlockBlob)={
-    //Set the expiry time and permissions for the container.
-    //In this case no start time is specified, so the shared access signature becomes valid immediately.
-    val sasConstraints = new SharedAccessBlobPolicy()
-    sasConstraints.setSharedAccessExpiryTime(new util.Date(2060))
-    sasConstraints.setPermissions(util.EnumSet.of(SharedAccessBlobPermissions.LIST,SharedAccessBlobPermissions.WRITE))
+  def getContainerSasUri(container: CloudBlockBlob) = {
 
-    //Generate the shared access signature on the container, setting the constraints directly on the signature.
-    val sasContainerToken = container.generateSharedAccessSignature(sasConstraints,"DownloadToolPolicy")
-
-
-    //Return the URI string for the container, including the SAS token.
-    container.getUri.toString +'/'+ sasContainerToken
+    val sasPolicy = new SharedAccessBlobPolicy
+    val cal = Calendar.getInstance()
+    cal.set(2030, 11, 31)
+    sasPolicy.setSharedAccessExpiryTime {
+      cal.getTime
+    }
+    sasPolicy.setSharedAccessStartTime(Calendar.getInstance.getTime)
+    sasPolicy.setPermissionsFromString("rwl")
+    //println(sasPolicy.getPermissions)
+    val url = container.generateSharedAccessSignature(sasPolicy, null)
+    //println(container.getUri)
+    //println("Generated SAS URL", container.getUri + "?" + url, " Expiry time = ", sasPolicy.getSharedAccessExpiryTime, "StartTime = ", sasPolicy.getSharedAccessStartTime)
+    println(container.getUri + "?" + url)
+    container.getUri + "?" + url
   }
 
   def zip(zipFilepath: String, filePaths: List[String]) {
-    import java.io.{BufferedReader, FileOutputStream, File}
+    import java.io.{BufferedReader, File, FileOutputStream}
     import java.util.zip.{ZipEntry, ZipOutputStream}
     val files = filePaths.map(new File(_))
     def readByte(bufferedReader: BufferedReader): Stream[Int] = {
@@ -221,23 +193,93 @@ object AzureStorageUtils {
     }
   }
 
+  def addPlatformAssets(jsonString: String, sasUrls: List[String]) = {
+    val jsonAst = jsonString.parseJson
+
+    val amendedJson = jsonAst.asJsObject.fields + (
+      "Platforms" -> JsArray(JsObject(
+        "Name" -> JsString("Python"),
+        "PlatformVersion" -> JsNull,
+        "PlatformAssets" -> JsArray(sasUrls.map(JsString(_)).toVector),
+        "ProvisionableAssets" -> JsNull
+      )))
+
+    amendedJson.toJson.toString()
+  }
+
+  def addPlatformAssetsToFile(jsonFile: String, sasUrls: List[String]) = {
+    val jsonString = scala.io.Source.fromFile(jsonFile).mkString
+    addPlatformAssets(jsonString, sasUrls)
+    //scala.tools.nsc.io.File(jsonFile).writeAll(newJson)
+  }
+
+  def getVersions(jsonFile: String): (String, String) = {
+    val jsonString = scala.io.Source.fromFile(jsonFile).mkString
+    val jsonAst = jsonString.parseJson.asJsObject.fields
+    (jsonAst("MajorVersion").toString().replace("\"",""), jsonAst("MinorVersion").toString().replace("\"",""))
+  }
+
+  def createFile(filename:String,body:String="")=scala.tools.nsc.io.File(filename).writeAll(body)
+
+  def findFiles(directory:String,regex:String):Array[File]={
+    new File(directory).listFiles()
+      .filter(!_.isDirectory)
+      .filter(f =>regex.r.findFirstIn(f.getName).isDefined)
+  }
+
+  def processPaletteFolder(dirName:String, keyFile:String)={
+
+    createFile(dirName +"__init__.py")
+    val pyFiles = findFiles(dirName,""".*\.py$""")
+    val jarFiles = findFiles(dirName,""".*\.jar$""")
+    val azureDir = new File(dirName+"\\azureml\\")
+    azureDir.mkdir()
+    azureDir.canRead
+    pyFiles.foreach(f=>{
+      println(f.getName)
+      FileUtils.copyFile(f,new File(azureDir.toString+"\\"+f.getName))
+    })
+    zipFolder(dirName+"azureml",dirName+"azureml.zip")
+
+    val filesToUpload= List(new File(dirName+"azureml.zip"))++jarFiles.toList
+
+    //val moprescuKey ="dHFkMMb/y4iKj0p9QMeoUcFonE7ObA1fkWroADzlvqREk9XljmSM+LuKiz4nXMIUQykCn1NgWBjvYJSaw57IDA=="
+    val wbaumannKey = "hx/zpWLu6RI/zbrD14vB5ITiFb95jfW6ZGxDdfwf3O/AqcvTjQQln270KOSPKDKHUW4VW2XRFYuZZ+WmeHt6sw=="
+
+    val paletteFile = dirName+"tempPalette.json"
+    val versionFolders = getVersions(paletteFile)._1+"/"+getVersions(paletteFile)._2+"/"
+
+    val sasUrls= filesToUpload.map(f=>{
+      println(f.toString)
+      println("moduledependencies/"+versionFolders+f.getName)
+
+      uploadFileToStorage(
+        f.toString,
+        versionFolders+f.getName,
+        "wbaumannstorage",
+        wbaumannKey,
+        "moduledependencies"
+      )
+    })
+
+    val jsonString = addPlatformAssetsToFile(paletteFile,sasUrls)
+    val url = "https://rdscurrent.azureml-test.net/palettes/definitions"
+    val host = "rdscurrent.azureml-test.net"
+    postJSON(jsonString,url,host,keyFile)
+
+  }
+
   def main(args: Array[String]): Unit = {
-    val dataRoot = "D:\\Data\\Text\\"
-    val files    = List("100", "1000", "10000").map(dataRoot + "small_data_" + _)
+    //val dataRoot = "D:\\Data\\Text\\"
+    //val files = List("100", "1000", "10000").map(dataRoot + "small_data_" + _)
     //zip(dataRoot + "zipped_data.zip", files)
 
-    uploadFileToStorage(
-      dataRoot + "small_data_1000",
-      "azureml/drivers/Mark/small_data_1000",
-      "moprescustorage",
-      "dHFkMMb/y4iKj0p9QMeoUcFonE7ObA1fkWroADzlvqREk9XljmSM+LuKiz4nXMIUQykCn1NgWBjvYJSaw57IDA==",
-      "moprescuspark"
-    )
+    //sasTest()
 
-    val url        = "https://rdscurrent.azureml-test.net/palettes/definitions"
-    val host       = "rdscurrent.azureml-test.net"
-    val jsonString = scala.io.Source.fromFile("tempPalette.json").mkString
-    //javaGet(jsonString, url, host)
-    //postJSON(jsonString,url,host)
+    val exampleRoot = "C:\\Users\\marhamil\\Documents\\Spark\\PaletteUploadExample\\"
+    val keyFile = exampleRoot + "test000.azuremlidentity.cloudapp.net.pfx"
+    processPaletteFolder(exampleRoot,keyFile)
+
+
   }
 }

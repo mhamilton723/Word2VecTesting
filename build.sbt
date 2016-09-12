@@ -12,6 +12,9 @@ libraryDependencies += "com.github.scopt" %% "scopt" % "3.5.0"
 resolvers += Resolver.sonatypeRepo("public")
 libraryDependencies += "org.scalaj" % "scalaj-http_2.11" % "2.3.0"
 
+libraryDependencies += "io.spray" %%  "spray-json" % "1.3.2"
+
+
 
 
 //resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
