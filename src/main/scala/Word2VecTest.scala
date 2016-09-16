@@ -1,4 +1,5 @@
-import java.io.FileWriter
+import java.io.{File, FileWriter}
+
 
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.{SparkConf, SparkContext}
@@ -55,6 +56,11 @@ object Word2VecTest {
           warehouse = "file:///C:/users/marhamil/IdeaProjects/Spark2Word2Vec/my/"
           dataRoot = "D:/Data/Text/"
           saveRoot = "D:/Data/fit_embeddings/"
+        }else if (config.environment == "github") {
+            master = "local[*]"
+            warehouse = new File("../my").getAbsolutePath
+            dataRoot = new File("Data").getAbsolutePath
+            saveRoot = new File("Data").getAbsolutePath
         } else if (config.environment == "cluster") {
           master = "yarn-cluster"
           warehouse = "wasb:///azureml/drivers/Mark"
@@ -95,11 +101,11 @@ object Word2VecTest {
           val middle = "_fn_" + config.fileName +
               "_minCount_" + config.minCount +
               "_nPart_" + config.nPart + "_nIter_" + config.nIter
-          root + prefix + middle + extension
+          new File(root,prefix + middle + extension).getAbsolutePath
         }
 
         //MAIN CODE
-        val logFile = dataRoot + config.fileName
+        val logFile = new File(dataRoot, config.fileName).getAbsolutePath
         val sentenceDF = spark.read
           .textFile(logFile)
           .map(s => "http:\\/\\/.*".r.replaceAllIn(s, " url "))

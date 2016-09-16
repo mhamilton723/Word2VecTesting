@@ -1,7 +1,6 @@
 import java.io.{File, FileInputStream}
 import java.util.Calendar
 
-import FolderZiper.zipFolder
 import com.microsoft.azure.storage.CloudStorageAccount
 import com.microsoft.azure.storage.blob._
 import org.apache.commons.httpclient.HttpClient
