@@ -5,6 +5,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.storage.StorageLevel
 import scopt.OptionParser
 
 //import org.apache.spark.implicits._
@@ -142,6 +143,7 @@ object Word2VecTest {
             println("saving model")
             try {
               val vects = model.getVectors
+              //vects.persist(StorageLevel.DISK_ONLY)
               vects.write.json(genFileName(saveRoot))
               println("Written")
             } catch {
