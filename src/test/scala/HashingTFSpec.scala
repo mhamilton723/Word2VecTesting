@@ -60,8 +60,8 @@ class HashingTFSpec extends SparkModuleSpec{
 
   it should "yield an error when applied to a null array" in {
     val tokenDataFrame = spark.createDataFrame(Seq(
-      (0, Array("Hi", "I", "can", "not", "foo")),
-      (1, null))
+      (0, Some(Array("Hi", "I", "can", "not", "foo"))),
+      (1, None))
     ).toDF("label", "tokens")
     testNullException(tokenDataFrame,new HashingTF().setInputCol("tokens"))
   }
@@ -70,7 +70,7 @@ class HashingTFSpec extends SparkModuleSpec{
     val words = Array("Hi", "I", "can", "not", "foo","bar","foo", "afk")
     val wordDataFrame = spark.createDataFrame(Seq((0, words))).toDF("label", "words")
 
-    testParameterExceptions(wordDataFrame,List(0,-1,-10),{n:Int=>
+    testParameterExceptions(List(0,-1,-10),{n:Int=>
       var result = new HashingTF().setNumFeatures(n).setInputCol("words").transform(wordDataFrame)
     })
   }

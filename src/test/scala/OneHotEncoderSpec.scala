@@ -80,15 +80,12 @@ class OneHotEncoderSpec extends SparkModuleSpec{
 
   it should "yield an error when applied to a null array" in {
     val df = spark.createDataFrame(Seq(
-      (0, 0.0),
-      (1, 1.0),
-      (2, 1.0)
+      (0, Some(0.0)),
+      (1, Some(1.0)),
+      (2, None)
     )).toDF("id", "categoryIndex")
     df.show()
-    val f: Int=>Option[Float] = {int:Int => {if(int==2){None}else{Some(int.toFloat)}}}
-    val getNull = udf(f)
-    val input = df.select(df("id"),getNull(df("id")).alias("categoryIndex"))
-    testSparkException(input,new OneHotEncoder().setInputCol("categoryIndex"))
+    testSparkException(df,new OneHotEncoder().setInputCol("categoryIndex"))
   }
 
   it should "yield an error when it receives a strange float" in {

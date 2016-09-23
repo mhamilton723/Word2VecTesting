@@ -1,6 +1,6 @@
 import java.io.{File, FileWriter}
 
-
+import org.apache.spark.sql.functions._
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.ml.feature._
@@ -30,7 +30,7 @@ object Word2VecTest {
     opt[Int]("nDim").action((x, c) => c.copy(nDim = x)).text("Number of embedding dimension")
     opt[Int]("minCount")
       .action((x, c) => c.copy(minCount = x))
-      .text("Min number of words to be included in embedding")
+      .text("Min number of occurances before a word is included in embedding")
     opt[Int]("nPart").action((x, c) => c.copy(nPart = x)).text("Number of parallel jobs")
     opt[Int]("nIter").action((x, c) => c.copy(nIter = x)).text("Number of iterations")
     opt[String]("environment")
@@ -130,6 +130,7 @@ object Word2VecTest {
         val removed = remover.transform(tokenized) //.distinct() this causes memory leaks for some reason
         //removed.show(5,truncate = false)
 
+
         if (runWord2Vec) {
           println("Starting word2vec")
           val word2Vec = new Word2Vec()
@@ -145,17 +146,25 @@ object Word2VecTest {
             word2Vec.fit(removed)
           }
 
+
+          def getEmbeddings(model:Word2VecModel): DataFrame ={
+            model.transform(model.getVectors.select('word)
+              .rdd.map(row=>Array(row.getString(0))).toDF(model.getInputCol))
+          }
+
           if (saveModel) {
             println("saving model")
             try {
-              val vects = model.getVectors
+              //val vects = model.getVectors
               //vects.persist(StorageLevel.DISK_ONLY)
-              vects.write.json(genFileName(saveRoot))
+              //vects.write.json(genFileName(saveRoot))
+              getEmbeddings(model).write.json(genFileName(saveRoot))
               println("Written")
             } catch {
               case e: org.apache.spark.sql.AnalysisException =>
                 println("Overwriting")
-                model.getVectors.write.mode("overwrite").json(genFileName(saveRoot))
+                //model.getVectors.write.mode("overwrite").json(genFileName(saveRoot))
+                getEmbeddings(model).write.mode("overwrite").json(genFileName(saveRoot))
             }
           }
 

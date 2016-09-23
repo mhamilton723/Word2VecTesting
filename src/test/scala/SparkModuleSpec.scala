@@ -1,13 +1,13 @@
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.SparkException
-import org.apache.spark.ml._
+import org.apache.spark.ml.{Model, _}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest._
 
 /**
   * Created by marhamil on 8/17/2016.
   */
-class SparkModuleSpec extends FlatSpec with Matchers{
+class SparkModuleSpec extends FlatSpec with Matchers with BeforeAndAfterAll{
   val spark = SparkSession
     .builder
     .master("local[*]")
@@ -23,9 +23,8 @@ class SparkModuleSpec extends FlatSpec with Matchers{
     dataFrame.select(outputCol).collect().map(_.getAs[T](0))
   }
 
-  def testParameterExceptions[T](dataFrame: DataFrame,parameters: List[T],
+  def testParameterExceptions[T](parameters: List[T],
                                  fitFunction: T => Unit, inputCol:String="words"): Unit ={
-
     parameters.foreach{ p=>
       an [IllegalArgumentException] should be thrownBy {
         fitFunction(p)
@@ -37,12 +36,14 @@ class SparkModuleSpec extends FlatSpec with Matchers{
     a [NullPointerException] should be thrownBy {
       transformer.transform(data).show()
     }
+    ()
   }
 
   def testSparkException[T <: Transformer](data: DataFrame,transformer:T): Unit ={
     a [org.apache.spark.SparkException] should be thrownBy {
       transformer.transform(data).show()
     }
+    ()
   }
 
 }
